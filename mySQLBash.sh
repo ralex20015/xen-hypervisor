@@ -1,6 +1,6 @@
-apt install mysql-server
-mysql -u root -p
-echo
+apt install default-mysql-server
+mysql -u root -p1 <<MY_QUERY
 CREATE DATABASE registro;
-echo
+SHOW DATABASES
+MY_QUERY
 
