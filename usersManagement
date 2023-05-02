@@ -1,0 +1,246 @@
+#!/bin/bash
+
+while :
+do
+	echo "Ingrese la opcion que desea: ";
+	echo "1. Crear usuario";
+	echo "2. Modificar usuario";
+	echo "3. Eliminar usuario";
+	echo "4. Eliminar usuario y sus archivos"
+	echo "5. Visualizar que grupo pertenece a cada usuario";
+	echo "6. Contrasenias";
+	echo "7. Listar usuarios registrados";
+	echo "8. Listar grupos disponibles";
+	echo "9. Crear un nuevo grupo";
+	echo "10. Modificar un grupo";
+	echo "11. Eliminar grupo";
+	echo "12. Salir";
+	read opc;
+
+	case $opc in
+		1)
+			echo "Ingrese el nombre de usuario"
+		        read userName;
+			if id "$userName" >/dev/null 2>&1; then
+				echo "El usuario $userName ya existe.";
+			else	
+				adduser $userName;
+				echo "Usuario creado exitosamente"
+			fi
+			;;
+	2)
+		echo "Que desea modificar?"
+		echo "1. Nombre de usuario";
+		echo "2. Directorio"
+		echo "3. Agregar usuario a uno o mas grupos"
+		echo "4. Fecha de expiracion de la cuenta del usuario"
+		echo "5. Bloquear password del usuario"
+		echo "6. Desbloquear password del usuario"
+		read op2
+		case $op2 in
+			1)
+
+				echo "Ingrese el nombre de usuario a modificar: ";
+				read userToModify;
+				if id $userToModify >/dev/null 2>&1; then
+					echo "Ingrese el nuevo nombre de usuario: ";
+					read newUserName;
+					usermod -l $newUserName $userToModify;
+				else
+					echo "El usuario no existe"
+				fi
+				;;
+			2)
+				echo "Ingrese el usuario a modificar"
+				read userToModify
+				if id $userToModify >/dev/null 2>&1; then
+					echo -n "Ingrese el nuevo directorio del usuario: ";
+					read newPath;
+					usermod -d $newPath -m $userToModify;
+				else
+					echo "El usuario no existe"
+				fi
+				;;
+			3)
+				echo "Ingrese el usuario a modificar"
+				read userToModify;
+				if id $userToModify >/dev/null 2>&1; then
+					echo -n "Ingrese el grupo al que quiere agregar el usuario: "
+					read group
+					usermod -G $group $userToModify
+					echo "Se agrego el usuario al grupo $group"
+				else
+					echo "El usuario no existe"
+				fi
+				;;
+			4)
+				echo -n "Ingrese el usuario a modificar: ";
+				read userToModify;
+				if id $userToModify >/dev/null 2>&1; then
+					echo -n "Ingrese la nueva fecha de expiracion de la cuenta del usuario en la forma: DD/MM/AAAA (Ejemplo: 15/01/2024)";
+					read newExpirationDate;
+					usermod --expiredate $newExpirationDate $userToModify;
+				else
+					echo "El usuario no existe";
+				fi
+				;;
+			5)
+				echo -n "Ingrese usuario a modificar: ";
+				read user;
+				if id $user >/dev/null 2>&1; then
+					usermod --lock $user;
+					echo "Contrasenia bloqueada del usuario $user";
+				else
+					echo "El usuario no existe"
+				fi
+				;;
+			6)
+				echo -n "Ingrese usuario a modificar: ";
+				read user;
+				if id $user > /dev/null 2>&1; then
+					usermod --unlock $user;
+					echo "Contrasenia desbloqueada del usuario $user";
+				else
+					echo "El usuario no existe";
+				fi
+				;;
+			*)
+				echo "Opcion invalida";
+				;;
+		esac
+		;;
+	3)
+		echo -n "Ingrese el usuario a eliminar: "
+		read userToDelete
+		case $userToDelete in
+			alex)
+				echo "No puedes eliminar este usuario"
+				;;
+			*)
+				if id $userToDelete >/dev/null 2>&1; then
+					userdel $userToDelete;
+					echo "Usuario $userToDelete eliminado exitosamente";
+				else
+					echo "El usuario $userToDelete no existe";
+				fi
+				;;
+		esac
+		;;
+	4)
+		echo -n "Ingrese el usuario a eliminar: ";
+		read usrToDelete;
+		case $usrToDelete in
+			alex)
+				echo "No puedes eliminar este usuario"
+				;;
+			*)
+				if id "$usrToDelete" >/dev/null 2>&1; then
+					userdel -rf $usrToDelete;
+					echo "Usuario eliminado con todos sus archivos";
+				else
+					echo "El usuario $usrToDelete no existe";
+				fi
+				;;
+		esac
+		;;
+	5)
+		echo -n "Ingrese el nombre de usuario al que desea ver los grupos a los que pertenece: "
+		read user
+		if id $user >/dev/null 2>&1; then
+			groups $user;
+		else
+			echo "El usuario no existe";
+		fi
+		;;
+	6)
+		echo "Que desea hacer?";
+		echo "1. Fecha de expiracion"
+		echo "2. Numero de dias para expiracion"
+		echo "3. Password expirado";
+		read op3;
+		case $op3 in
+			1)	
+				echo "Ingrese el usuario del que desea ver la fecha de expiracion";
+				read user;
+				chage --lis $user;
+				;;
+			2)
+				echo "Ingrese el numero de dias para la expiracion del password: "
+				read days;
+				echo "Ingrese el usuario al que desea cambiar el numero de dias para la expiracion: ";
+				read user;
+				chage -M $days $user;
+				;;
+			3)
+				echo "Ingrese el usuario que desea expirar su password: "
+				read user;
+				chage -d 0 $user;
+				;;
+		esac
+		;;
+	7)
+		cat /etc/passwd;
+		;;
+	8)
+		cat /etc/group
+		;;
+	9)
+		echo -n "Ingrese el nombre del nuevo grupo: ";
+		read newGroup	
+		groupadd $newGroup;	
+		;;
+	10)
+		echo "Que desea hacer?"
+		echo "1. Modificar nombre del grupo";
+		echo "2. Agregar usuario a un grupo";
+		echo "3. Eliminar usuario de un grupo";
+		read option
+		case $option in
+			1)
+				echo -n "Ingrese el nombre del grupo que desea modificar: "
+				read group	
+				echo -n "Ingrese el nuevo nombre del grupo: ";
+				read newGroupName
+				groupmod -n $newGroupName $group;
+				;;
+			2)
+				echo "Ingrese el nombre del usuario al que agregara a un grupo: "
+				read user;
+				if id $user >/dev/null 2>&1; then
+					echo "Ingrese el nombre del grupo: "
+					read group
+					gpasswd -a $user $group;
+				else
+					echo "El usuario no existe";
+				fi
+				;;
+			3)
+				echo "Ingrese el nombre de usuario para eliminarlo de un grupo"
+				read user
+				if id $user >/dev/null 2>&1; then
+					echo "Ingrese el nombre del grupo: "
+					read group	
+					gpasswd -d $user $group;
+				else
+					echo "El usuario no existe"
+				fi
+				;;
+			*)
+				echo "Opcion invalida";
+				;;
+		esac
+		;;
+		11)
+			echo -n "Ingrese el nombre del grupo que desea eliminar: ";
+			read group;		
+			groupdel $group
+			;;
+		12)
+			break
+			;;
+		*)
+			echo "Opcion invalida";
+			;;
+	esac
+done
+
